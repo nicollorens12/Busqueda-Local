@@ -4,5 +4,5 @@ public class Estado {
 
     public Usuarios users;
     public ArrayList<ArrayList<Usuario>> Orden;
-    public String
+    public String s;
 }
