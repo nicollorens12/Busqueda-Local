@@ -1,6 +1,10 @@
-public class EstadoFinal {
+import aima.search.framework.GoalTest;
 
-    boolean isGoalState(){
-        return false;
+public class EstadoFinal implements GoalTest{
+
+    @Override
+    public boolean isGoalState(Object arg0) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isGoalState'");
     }
 }
