@@ -1,4 +1,8 @@
+package BusquedaLocal.src;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.lang.Math;
 import IA.Comparticion.Usuario;
@@ -6,23 +10,23 @@ import IA.Comparticion.Usuarios;
 public class Estado {
 
     public static Usuarios users;
-    public ArrayList<ArrayList<Usuario>> trayectos;
-    public ArrayList<Integer> distancias; // nose si dejarlo o calcularlo al momento, asi no gasta tanta memoria
-    public ArrayList<Integer> pasajerosSimulatenos; // nose si dejarlo o calcularlo al momento, asi no gasta tanta memoria
+    public ArrayList<ArrayList<Integer>> trayectos;
+    public ArrayList<Integer> distancias = new ArrayList<Integer>(); // nose si dejarlo o calcularlo al momento, asi no gasta tanta memoria
+    public ArrayList<Integer> pasajerosSimulatenos = new ArrayList<Integer>(); // nose si dejarlo o calcularlo al momento, asi no gasta tanta memoria
 
     public Estado(){
-        Estado(200,100,1234);
+        new Estado(200,100,1234);
     }
     public Estado(int nUs, int nCond, int seed ){
         users = new Usuarios(nUs,nCond,seed);
-        trayectos = Inicial2; // Inicial1(nUs,nCond);
+        trayectos = Inicial2(); // Inicial1(nUs,nCond);
     }
 
     private ArrayList<ArrayList<Usuario>> Inicial1 (int nUs, int nCond){
         //Usamos numero maximo conductores y recoje a los usuarios mas  con maximo de ocupacion de un coche de N/M
         int car_max_capacity = nUs/nCond;
         char[][] Ciudad;
-        ArrayList<ArrayList<Usuario>> Orden_Inicial;
+        ArrayList<ArrayList<Usuario>> Orden_Inicial = new ArrayList<ArrayList<Usuario>>();
         Ciudad = new char[100][100];
         for(int i = 0; i < 100; i++) {
             for(int j = 0; j < 100; j++) {
@@ -33,18 +37,20 @@ public class Estado {
         for(int k = 0; k < nUs; ++k){
             Usuario u = users.get(k);
             if(u.isConductor()){
-                Ciudad[u.getCoordDestinoX][u.getCoordDestinoY] = 'c';
+                Ciudad[u.getCoordDestinoX()][u.getCoordDestinoY()] = 'c';
                 ArrayList<Usuario> v_aux = new ArrayList<>();
                 v_aux.add(u);
                 Orden_Inicial.add(v_aux);
             }
-            else Ciudad[u.getCoordDestinoX][u.getCoordDestinoY] = 'u';
+            else Ciudad[u.getCoordDestinoX()][u.getCoordDestinoY()] = 'u';
         }
-        return BFS(Ciudad);
+        //return BFS(Ciudad);
+        return null;
     }
 
-    private ArrayList<ArrayList<Usuario>> Inicial2 (){
+    private ArrayList<ArrayList<Integer>> Inicial2 (){
         // creamos tantos trayectos como conducotres, llenamos cada coche con numero max personas
+        ArrayList<ArrayList<Integer>> trayectos = new ArrayList<ArrayList<Integer>>();
         for(int i = 0; i<users.size(); ++i){
             ArrayList<Integer> coche = new ArrayList<>();
             Usuario u = users.get(i);
@@ -56,11 +62,11 @@ public class Estado {
         }
         for(int i = 0; i<users.size(); ++i){
             Usuario u = users.get(i);
-            if(not u.isConductor()){
-                int j = 0; boolean insertado = False;
-                while(j<trayectos.size() && not insertado){
+            if(!u.isConductor()){
+                int j = 0; boolean insertado = false;
+                while(j<trayectos.size() && !insertado){
                     if ((j == trayectos.size()-1) || (trayectos.get(j).size() < 6)){
-                        insertado = True;
+                        insertado = true;
                         trayectos.get(j).add(1,i);
                         trayectos.get(j).add(1,i);
                     }
@@ -72,6 +78,7 @@ public class Estado {
             distancias.add(calcular_distancia(trayecto));
             pasajerosSimulatenos.add(calcular_pasajerosSimulataneos(trayecto));
         }
+        return trayectos;
     }
     public int calcular_distancia(List<Integer> trayecto){
         int dist = 0;
@@ -96,7 +103,7 @@ public class Estado {
             int yDest = users.get(trayecto.get(trayecto.size()-1)).getCoordDestinoY();
             dist += Math.abs(xDest-xOrig)+Math.abs(yDest-yOrig);
         }
-        if (trayecto.size == 2){
+        if (trayecto.size() == 2){
             int xOrig = users.get(trayecto.get(0)).getCoordOrigenX();
             int yOrig = users.get(trayecto.get(0)).getCoordOrigenY();
             int xDest = users.get(trayecto.get(1)).getCoordDestinoX();
@@ -107,7 +114,9 @@ public class Estado {
     }
     public int calcular_pasajerosSimulataneos(List<Integer> trayecto){
         int maxPasajeros=0;
-        Set aux = new Set<Integer>();
+        //Esto da un null y no lo entiendo del todo pq, antes habia esto
+        // Set aux = new Set<Integer>()
+        Set aux = null;
         for (int i=1; i<trayecto.size()-1; ++i){
             if (aux.contains(trayecto.get(i))) aux.remove(trayecto.get(i));
             else {
@@ -121,7 +130,7 @@ public class Estado {
     public void OperadorMover(int coche1, int coche2, int userId, int userPos){
 
         int losDos = 0;
-        for (int i=0; i<trayectos.get(coche1).size() && not losDos.equals(2); ++i){
+        for (int i=0; i<trayectos.get(coche1).size() && losDos != 2; ++i){
             if(trayectos.get(coche1).get(i).equals(userId)){
                 ++losDos;
                 trayectos.get(coche1).remove(i);
@@ -129,20 +138,26 @@ public class Estado {
             }
         }
 
-        if (userPos.equals(0) || userPos>=trayectos.get(coche2).size()-1) userPos = 1;
+        if (userPos == 0  || userPos>=trayectos.get(coche2).size()-1) userPos = 1;
         trayectos.get(coche2).add(userPos,userId);
         trayectos.get(coche2).add(userPos,userId);
 
-        if (not trayectos.get(coche1).size().equals(0)){
+        if (trayectos.get(coche1).size() != 0){
             distancias.set(coche1, calcular_distancia(trayectos.get(coche1)));
-            pasajerosSimulatenos.set(coche1, pasajerosSimulatenos(trayectos.get(coche1)));)
+            pasajerosSimulatenos.set(coche1, pasajerosSimulatenos(trayectos.get(coche1)));
         }
         distancias.set(coche2, calcular_distancia(trayectos.get(coche2)));
-        pasajerosSimulatenos.set(coche2, pasajerosSimulatenos(trayectos.get(coche2)));)
+        pasajerosSimulatenos.set(coche2, pasajerosSimulatenos(trayectos.get(coche2)));
     }
+
+    private Integer pasajerosSimulatenos(ArrayList<Integer> integers) {
+        return 1;
+    }
+
     public void OperadorSwap(int coche, int i, int j){
-        if (not i.equals(0) && not j.equals(0) && not i.equals(trayectos.get(coche).size()-1) && not j.equals(trayectos.get(coche).size()-1)) {
-            Collections.swap(trayectos.get(coche), pos, pos+k);
+        if (i != 0 && j != 0 && i != trayectos.get(coche).size()-1 && j != trayectos.get(coche).size()-1) {
+            int pos;
+            Collections.swap(trayectos.get(coche), i, j);
             distancias.set(coche, calcular_distancia(trayectos.get(coche)));
             pasajerosSimulatenos.set(coche, calcular_pasajerosSimulataneos(trayectos.get(coche)));
         }

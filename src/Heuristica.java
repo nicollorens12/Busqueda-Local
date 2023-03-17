@@ -1,3 +1,5 @@
+package BusquedaLocal.src;
+
 import aima.search.framework.HeuristicFunction;
 
 public class Heuristica implements HeuristicFunction {

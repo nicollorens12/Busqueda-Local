@@ -1,6 +1,10 @@
-public class EstadoFinal {
+package BusquedaLocal.src;
 
-    boolean isGoalState(){
-        return false;
+import aima.search.framework.GoalTest;
+
+public class EstadoFinal implements GoalTest {
+
+    public boolean isGoalState(Object aState) {
+        return(false);
     }
 }
