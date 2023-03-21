@@ -9,77 +9,90 @@ import IA.Comparticion.Usuario;
 import IA.Comparticion.Usuarios;
 public class Estado {
 
-    public static Usuarios users;
+    public Usuarios users;
     public ArrayList<ArrayList<Integer>> trayectos;
-    public ArrayList<Integer> distancias = new ArrayList<Integer>(); // nose si dejarlo o calcularlo al momento, asi no gasta tanta memoria
-    public ArrayList<Integer> pasajerosSimulatenos = new ArrayList<Integer>(); // nose si dejarlo o calcularlo al momento, asi no gasta tanta memoria
+    public ArrayList<Integer> distancias = new ArrayList<>(); // nose si dejarlo o calcularlo al momento, asi no gasta tanta memoria
+    public ArrayList<Integer> pasajerosSimulatenos = new ArrayList<>(); // nose si dejarlo o calcularlo al momento, asi no gasta tanta memoria
+    private int Velocidad = 30; //Km/h
 
-    public Estado(){
-        new Estado(200,100,1234);
-    }
     public Estado(int nUs, int nCond, int seed ){
         users = new Usuarios(nUs,nCond,seed);
-        trayectos = Inicial2(); // Inicial1(nUs,nCond);
-    }
-
-    private ArrayList<ArrayList<Usuario>> Inicial1 (int nUs, int nCond){
-        //Usamos numero maximo conductores y recoje a los usuarios mas  con maximo de ocupacion de un coche de N/M
-        int car_max_capacity = nUs/nCond;
-        char[][] Ciudad;
-        ArrayList<ArrayList<Usuario>> Orden_Inicial = new ArrayList<ArrayList<Usuario>>();
-        Ciudad = new char[100][100];
-        for(int i = 0; i < 100; i++) {
-            for(int j = 0; j < 100; j++) {
-                Ciudad[i][j] = '.';
-            }
-        }
-
-        for(int k = 0; k < nUs; ++k){
-            Usuario u = users.get(k);
-            if(u.isConductor()){
-                Ciudad[u.getCoordDestinoX()][u.getCoordDestinoY()] = 'c';
-                ArrayList<Usuario> v_aux = new ArrayList<>();
-                v_aux.add(u);
-                Orden_Inicial.add(v_aux);
-            }
-            else Ciudad[u.getCoordDestinoX()][u.getCoordDestinoY()] = 'u';
-        }
-        //return BFS(Ciudad);
-        return null;
+        trayectos = Inicial3(); // Inicial1(nUs,nCond);
     }
 
     private ArrayList<ArrayList<Integer>> Inicial2 (){
         // creamos tantos trayectos como conducotres, llenamos cada coche con numero max personas
-        ArrayList<ArrayList<Integer>> trayectos = new ArrayList<ArrayList<Integer>>();
-        for(int i = 0; i<users.size(); ++i){
+        // cogemos un pasajero, lo dejamos en y luego cogemos a otro
+        ArrayList<ArrayList<Integer>> trayectos = new ArrayList<>();
+        for(int i = 0; i < users.size(); ++i){
             ArrayList<Integer> coche = new ArrayList<>();
             Usuario u = users.get(i);
             if(u.isConductor()){
+                //Se añade dos veces dado que tiene que ser el orden que entra y sale
                 coche.add(i);
                 coche.add(i);
                 trayectos.add(coche);
             }
         }
-        for(int i = 0; i<users.size(); ++i){
+        for(int i = 0; i < users.size(); ++i){
             Usuario u = users.get(i);
             if(!u.isConductor()){
-                int j = 0; boolean insertado = false;
-                while(j<trayectos.size() && !insertado){
-                    if ((j == trayectos.size()-1) || (trayectos.get(j).size() < 6)){
+                int j = 0;
+                boolean insertado = false;
+                while (j < trayectos.size() && !insertado) {
+                    if(trayectos.get(j).size() <= 6) {
                         insertado = true;
                         trayectos.get(j).add(1,i);
-                        trayectos.get(j).add(1,i);
+                        trayectos.get(j).add(1 ,i);
                     }
-                    j++;
+                    ++j;
                 }
             }
         }
+        distancias.clear();
         for(ArrayList<Integer> trayecto : trayectos){
             distancias.add(calcular_distancia(trayecto));
-            pasajerosSimulatenos.add(calcular_pasajerosSimulataneos(trayecto));
         }
         return trayectos;
     }
+
+    private ArrayList<ArrayList<Integer>> Inicial3 (){
+        // creamos tantos trayectos como conducotres, llenamos cada coche con numero max personas
+        // Primero cogemos a los pasajeros y luego los dejamos a todos
+        ArrayList<ArrayList<Integer>> trayectos = new ArrayList<>();
+        for(int i = 0; i < users.size(); ++i){
+            ArrayList<Integer> coche = new ArrayList<>();
+            Usuario u = users.get(i);
+            if(u.isConductor()){
+                //Se añade dos veces dado que tiene que ser el orden que entra y sale
+                coche.add(i);
+                coche.add(i);
+                trayectos.add(coche);
+            }
+        }
+        for(int i = 0; i < users.size(); ++i){
+            Usuario u = users.get(i);
+            if(!u.isConductor()){
+                int j = 0;
+                boolean insertado = false;
+                while (j < trayectos.size() && !insertado) {
+                    if(trayectos.get(j).size() < 6) {
+                        insertado = true;
+                        trayectos.get(j).add(1,i);
+                        trayectos.get(j).add(trayectos.get(j).size() -1 ,i);
+                    }
+                    ++j;
+                }
+            }
+        }
+        distancias.clear();
+        for(ArrayList<Integer> trayecto : trayectos){
+            distancias.add(calcular_distancia(trayecto));
+        }
+        return trayectos;
+    }
+
+
     public int calcular_distancia(List<Integer> trayecto){
         int dist = 0;
         if (trayecto.size() > 2){
@@ -216,5 +229,31 @@ public class Estado {
         penalizacion += 1*trayectos.size(); // podemos multiplicarlo por constante para darle más/menos peso
 
         return penalizacion;
+    }
+
+    public Usuarios GetUsuarios(){
+        return this.users;
+    }
+
+    public Usuario GetUsuario(int index){
+        return this.users.get(index);
+    }
+
+    public ArrayList<Integer> GetTrayectos(int index){
+        return this.trayectos.get(index);
+    }
+
+    public int TrayectoSize(){
+        return this.trayectos.size();
+    }
+
+    public int DistanciaTrayecto(int coche){
+        return this.distancias.get(coche);
+    }
+
+    public double TiempoDemora(int coche){
+        //v=d/t   t=d/v
+        double distancia = this.distancias.get(coche);
+        return distancia/ this.Velocidad;
     }
 }

@@ -1,10 +1,12 @@
 package BusquedaLocal.src;
 
+import IA.Comparticion.Usuario;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -13,11 +15,25 @@ public class Main {
     public static void main(String[] args) {
         int nUs, nCond, seed;
         //leer variables
-        nUs = 200;
-        nCond = 100;
+        nUs = 10;
+        nCond = 3;
         seed = 0;
         Estado e = new Estado(nUs,nCond,seed);
-        TSPHillClimbingSearch(e);
+        for(int i = 0; i < e.TrayectoSize(); ++i){
+            ArrayList<Integer> coche = e.GetTrayectos(i);
+            int distancia = e.DistanciaTrayecto(i);
+            double tiempo = e.TiempoDemora(i);
+            System.out.println("coche : " + i + " Distancia: " + distancia + " Tiempo: " + tiempo);
+            for(int j = 0; j < coche.size(); ++j){
+                Integer usuarioId = coche.get(j);
+                Usuario u = e.GetUsuario(usuarioId);
+                String tipoPasajero = u.isConductor() ? "Conductor" : "Pasajero";
+                String coodenadas = j >= coche.size()/2 ? "     Cordenadas destino X: " + u.getCoordDestinoX() + " Y: " + u.getCoordDestinoY() : "     Cordenadas Origen X: " + u.getCoordOrigenX() + " Y: " + u.getCoordOrigenY();
+                System.out.println("    " + tipoPasajero + " numero " + usuarioId);
+                System.out.println(coodenadas);
+            }
+        }
+        //TSPHillClimbingSearch(e);
         //TSPSimulatedAnnealingSearch(TSPB);
     }
     private static void TSPHillClimbingSearch(Estado estate) {
