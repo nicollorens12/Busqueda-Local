@@ -15,7 +15,9 @@ public class Estado {
     //region Constructores
     public Estado(int nUs, int nCond, int seed ){
         users = new Usuarios(nUs,nCond,seed);
-        trayectos = Inicial4(); // Inicial1(nUs,nCond);
+        int maxOcup = nUs/nCond;
+        trayectos = InicialValido(users, maxOcup);
+        //trayectos = Inicial4(); // Inicial1(nUs,nCond);
     }
 
     public Estado(Estado estado){
@@ -136,6 +138,37 @@ public class Estado {
             pasajerosSimulatenos.add(calcularPasajerosSimulataneos(trayecto));
         }
         return trayectos;
+    }
+
+    private ArrayList<ArrayList<Integer>> InicialValido(Usuarios users, int maxOcup){
+        if(maxOcup > 3){
+            new Exception("No hay suficientes coches");
+        }
+        users.sort(new Distance());
+        int size = users.size();
+        ArrayList<Boolean> assigned = new ArrayList<Boolean> (size,false);
+        for(int i = 0; i < size; ++i){
+            if(users.get(i).isConductor()){
+                if(i == 0){
+                    int j = i + 1;
+                    while(users.get(j).isConductor() || assigned.get(j)){
+                        if(j >= size) { //que no hay mas usuarios para recoger
+                            //asignar los conductores que quedan a la variable trayecto
+                        }
+                        ++j;
+                    }
+                    //Asignar user.get(j) al trayecto
+                    assigned.set(j,true);
+                    assigned.set(i,true);
+                }
+                else{
+                    int left = i - 1;
+                    int right = i + 1;
+                    while()
+                }
+
+            }
+        }
     }
 
     //endregion
@@ -333,6 +366,14 @@ public class Estado {
 
     public ArrayList<Integer> PasajerosSimultaneos(){ return this.pasajerosSimulatenos;}
 
+    class Distance implements Comparator<Usuario> {
+        @Override
+        public int compare(Usuario user1, Usuario user2) {
+            int dist1 = (Math.abs(user1.getCoordOrigenX() - 0) + Math.abs(user1.getCoordOrigenY() - 0));
+            int dist2 = (Math.abs(user2.getCoordOrigenX() - 0) + Math.abs(user2.getCoordOrigenY() - 0));
 
+            return dist1 < dist2 ? -1 : dist1 == dist2 ? 0 : 1;
+        }
+    }
     //endregion
 }
