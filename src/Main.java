@@ -21,8 +21,8 @@ public class Main {
         nCond = 100;
         seed = 1234;
         Estado e = new Estado(nUs,nCond,seed);
-        //TSPHillClimbingSearch(e);
-        TSPSimulatedAnnealingSearch(e);
+        TSPHillClimbingSearch(e);
+        //TSPSimulatedAnnealingSearch(e);
     }
     private static void TSPHillClimbingSearch(Estado estate) {
         System.out.println("\nTSP HillClimbing  -->");

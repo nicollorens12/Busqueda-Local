@@ -146,29 +146,66 @@ public class Estado {
         }
         users.sort(new Distance());
         int size = users.size();
-        ArrayList<Boolean> assigned = new ArrayList<Boolean> (size,false);
+        ArrayList<Boolean> assigned = new ArrayList<>(Collections.nCopies(users.size(), false));
+        ArrayList<ArrayList<Integer>> trayectos = new ArrayList<ArrayList<Integer>>();
         for(int i = 0; i < size; ++i){
-            if(users.get(i).isConductor()){
-                if(i == 0){
-                    int j = i + 1;
-                    while(users.get(j).isConductor() || assigned.get(j)){
-                        if(j >= size) { //que no hay mas usuarios para recoger
-                            //asignar los conductores que quedan a la variable trayecto
-                        }
-                        ++j;
-                    }
-                    //Asignar user.get(j) al trayecto
-                    assigned.set(j,true);
-                    assigned.set(i,true);
-                }
-                else{
-                    int left = i - 1;
-                    int right = i + 1;
-                    while()
-                }
 
+            if(users.get(i).isConductor()) {
+                ArrayList<Integer> coche = new ArrayList<>();
+                coche.add(i);
+                coche.add(i);
+                int left = iterate_left(users, i - 1, assigned);
+                int right = iterate_right(users, i + 1, assigned);
+
+                if (left == -1 && right != -1) {
+                    coche.add(1,right);
+                    coche.add(1,right);
+                    assigned.set(i, true);
+                    assigned.set(right, true);
+                } else if (left != -1 && right == -1) {
+                    coche.add(1,left);
+                    coche.add(1,left);
+                    assigned.set(i, true);
+                    assigned.set(left, true);
+                } else if ((i - left) <= (right - i)) {
+                    coche.add(1,left);
+                    coche.add(1,left);
+                    assigned.set(i, true);
+                    assigned.set(left, true);
+                } else if ((i - left) > (right - i)) {
+                    coche.add(1,right);
+                    coche.add(1,right);
+                    assigned.set(i, true);
+                    assigned.set(right, true);
+                } else { //Caso en que hay conductor pero no mas usuarios
+
+                    assigned.set(i, true);
+                }
+                trayectos.add(coche);
             }
         }
+        return trayectos;
+    }
+
+    private int iterate_left(Usuarios users,int i, ArrayList<Boolean> assigned){
+        if(i < 0) return -1;
+        Usuario u = users.get(i);
+        while(u.isConductor() || assigned.get(i)){
+            --i;
+            if(i < 0) return -1;
+            u = users.get(i);
+        }
+        return i;
+    }
+    private int iterate_right(Usuarios users,int i , ArrayList<Boolean> assigned){
+        if(i >= users.size()) return -1;
+        Usuario u = users.get(i);
+        while(u.isConductor() || assigned.get(i)){
+            ++i;
+            if(i >= users.size()) return -1;
+            u = users.get(i);
+        }
+        return i;
     }
 
     //endregion
@@ -369,8 +406,8 @@ public class Estado {
     class Distance implements Comparator<Usuario> {
         @Override
         public int compare(Usuario user1, Usuario user2) {
-            int dist1 = (Math.abs(user1.getCoordOrigenX() - 0) + Math.abs(user1.getCoordOrigenY() - 0));
-            int dist2 = (Math.abs(user2.getCoordOrigenX() - 0) + Math.abs(user2.getCoordOrigenY() - 0));
+            int dist1 = (Math.abs((user1.getCoordOrigenX() + user1.getCoordDestinoX()) - 0) + Math.abs((user1.getCoordOrigenY() + user1.getCoordDestinoY()) - 0));
+            int dist2 = (Math.abs((user2.getCoordOrigenX() + user2.getCoordDestinoX()) - 0) + Math.abs((user2.getCoordOrigenY() + user2.getCoordDestinoY()) - 0));
 
             return dist1 < dist2 ? -1 : dist1 == dist2 ? 0 : 1;
         }
