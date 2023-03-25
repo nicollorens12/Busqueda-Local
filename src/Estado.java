@@ -295,6 +295,12 @@ public class Estado {
         return dist;
     }
 
+    public int CalcularDistanciaTotal(){
+        int total_traveled = 0;
+        for(int i = 0; i < distancias.size(); ++i) total_traveled += distancias.get(i);
+        return total_traveled;
+    }
+
     private int calcularPasajerosSimulataneos(List<Integer> trayecto){
         int maxPasajeros=0;
         HashSet aux = new HashSet<Integer>();

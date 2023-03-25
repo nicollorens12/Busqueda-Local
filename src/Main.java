@@ -34,8 +34,10 @@ public class Main {
 
             long end_time = System.nanoTime();
             double difference = (end_time-start_time) / 1e6;
-            System.out.println("\n\nTime elapsed: " + difference + "milliseconds, which are " + (difference/1e3) + " seconds.");
 
+
+            //Distancia total de todos los conductores y numero de conductores
+            //Numero de conductores es
             Estado solucion = (Estado) search.getGoalState();
             EstadoFinal comprobar = new EstadoFinal();
             boolean esCorrecto = comprobar.isGoalState(solucion);
@@ -46,6 +48,9 @@ public class Main {
             printActions(agent.getActions());
             printInstrumentation(agent.getInstrumentation());
             if(esCorrecto) {printSolucion(solucion);}
+            System.out.println("\n\nTime elapsed: " + difference + "milliseconds, which are " + (difference/1e3) + " seconds.");
+            int total_distance = solucion.CalcularDistanciaTotal();
+            System.out.println("\n\nWith " + solucion.TrayectosSize() + " drivers and a total distance traveled of " + total_distance);
         } catch (Exception e) {
             e.printStackTrace();
         }
