@@ -34,41 +34,6 @@ public class Estado {
     //endregion
 
     //region EstadosIniciales
-    private ArrayList<ArrayList<Integer>> Inicial2 (){
-        // creamos tantos trayectos como conducotres, llenamos cada coche con numero max personas
-        // cogemos un pasajero, lo dejamos en y luego cogemos a otro
-        ArrayList<ArrayList<Integer>> trayectos = new ArrayList<>();
-        for(int i = 0; i < users.size(); ++i){
-            ArrayList<Integer> coche = new ArrayList<>();
-            Usuario u = users.get(i);
-            if(u.isConductor()){
-                //Se añade dos veces dado que tiene que ser el orden que entra y sale
-                coche.add(i);
-                coche.add(i);
-                trayectos.add(coche);
-            }
-        }
-        for(int i = 0; i < users.size(); ++i){
-            Usuario u = users.get(i);
-            if(!u.isConductor()){
-                int j = 0;
-                boolean insertado = false;
-                while (j < trayectos.size() && !insertado) {
-                    if(trayectos.get(j).size() <= 6) {
-                        insertado = true;
-                        trayectos.get(j).add(1,i);
-                        trayectos.get(j).add(1 ,i);
-                    }
-                    ++j;
-                }
-            }
-        }
-        distancias.clear();
-        for(ArrayList<Integer> trayecto : trayectos){
-            distancias.add(CalcularDistancia(trayecto));
-        }
-        return trayectos;
-    }
 
     private ArrayList<ArrayList<Integer>> Inicial3 (){
         // creamos tantos trayectos como conducotres, llenamos cada coche con numero max personas
@@ -262,8 +227,30 @@ public class Estado {
 
     //region ClasesPrivadas
 
-    public int CalcularDistancia(List<Integer> trayecto){ // mejorar: creo q esta mal pq no tiene en cuenta si es A B C D ...
-        int dist = 0;
+    public int CalcularDistancia(List<Integer> trayecto){
+        int dist = 0;// mejorar: creo q esta mal pq no tiene en cuenta si es A B C D ...
+        if(trayecto.size() > 0) {
+            ArrayList<Integer> UsuariosRecogidos = new ArrayList<>();
+            int xOrigT = users.get(trayecto.get(0)).getCoordOrigenX();
+            int yOrigT = users.get(trayecto.get(0)).getCoordOrigenY();
+            UsuariosRecogidos.add(trayecto.get(0));
+            for (int i = 1; i < trayecto.size(); ++i) {
+                int xDest = users.get(trayecto.get(i)).getCoordOrigenX();
+                int yDest = users.get(trayecto.get(i)).getCoordOrigenY();
+                if (EstaPasajero(UsuariosRecogidos, trayecto.get(i))) {
+                    xDest = users.get(trayecto.get(i)).getCoordDestinoX();
+                    yDest = users.get(trayecto.get(i)).getCoordDestinoY();
+                } else {
+                    UsuariosRecogidos.add(trayecto.get(i));
+                }
+                dist += Math.abs(xOrigT - xDest) + Math.abs(yOrigT - yDest);
+                xOrigT = xDest;
+                yOrigT = yDest;
+            }
+        }
+        return dist;
+
+        /*int dist = 0;
         if (trayecto.size() > 2){
             int xOrig = users.get(trayecto.get(0)).getCoordOrigenX();
             int yOrig = users.get(trayecto.get(0)).getCoordOrigenY();
@@ -292,13 +279,20 @@ public class Estado {
             int yDest = users.get(trayecto.get(1)).getCoordDestinoY();
             dist += Math.abs(xDest-xOrig)+Math.abs(yDest-yOrig);
         }
-        return dist;
+        return dist;*/
     }
 
     public int CalcularDistanciaTotal(){
         int total_traveled = 0;
         for(int i = 0; i < distancias.size(); ++i) total_traveled += distancias.get(i);
         return total_traveled;
+    }
+
+    private boolean EstaPasajero(ArrayList<Integer> pasajeros, Integer pasajero){
+        for(int i = 0; i < pasajeros.size();++i){
+            if(pasajero == pasajeros.get(i)) return true;
+        }
+        return  false;
     }
 
     private int calcularPasajerosSimulataneos(List<Integer> trayecto){

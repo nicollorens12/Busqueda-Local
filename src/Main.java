@@ -15,25 +15,27 @@ import java.util.Properties;
 
 public class Main {
     public static void main(String[] args) {
-        int nUs, nCond, seed;
-        //leer variables
-        nUs = 200;
-        nCond = 100;
-        seed = 1234;
-        Estado e = new Estado(nUs,nCond,seed);
-        TSPHillClimbingSearch(e);
-        //TSPSimulatedAnnealingSearch(e);
+        //for(int i = 0; i < 700; ++i) {
+            int nUs, nCond, seed;
+            //leer variables
+            nUs = 200;
+            nCond = 100;
+            seed = 1234;
+            Estado e = new Estado(nUs, nCond, seed);
+            //TSPHillClimbingSearch(e);
+            TSPSimulatedAnnealingSearch(e);
+        //}
     }
     private static void TSPHillClimbingSearch(Estado estate) {
         System.out.println("\nTSP HillClimbing  -->");
         try {
             long start_time = System.nanoTime();
-            Problem problem =  new Problem(estate,new GeneradorSucesores(), new EstadoFinal(),new Heuristica());
-            Search search =  new HillClimbingSearch();
-            SearchAgent agent = new SearchAgent(problem,search);
+            Problem problem = new Problem(estate, new GeneradorSucesores(), new EstadoFinal(), new Heuristica());
+            Search search = new HillClimbingSearch();
+            SearchAgent agent = new SearchAgent(problem, search);
 
             long end_time = System.nanoTime();
-            double difference = (end_time-start_time) / 1e6;
+            double difference = (end_time - start_time) / 1e6;
 
 
             //Distancia total de todos los conductores y numero de conductores
@@ -47,10 +49,12 @@ public class Main {
             System.out.println();
             printActions(agent.getActions());
             printInstrumentation(agent.getInstrumentation());
-            if(esCorrecto) {printSolucion(solucion);}
-            System.out.println("\n\nTime elapsed: " + difference + "milliseconds, which are " + (difference/1e3) + " seconds.");
-            int total_distance = solucion.CalcularDistanciaTotal();
-            System.out.println("\n\nWith " + solucion.TrayectosSize() + " drivers and a total distance traveled of " + total_distance);
+            if (esCorrecto) {
+                printSolucion(solucion);
+                System.out.println("\n\nTime elapsed: " + difference + "milliseconds, which are " + (difference / 1e3) + " seconds.");
+                int total_distance = solucion.CalcularDistanciaTotal();
+                System.out.println("\n\nWith " + solucion.TrayectosSize() + " drivers and a total distance traveled of " + total_distance);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -76,9 +80,15 @@ public class Main {
             else System.out.println("La solucion es valida? " + esCorrecto);
 
             System.out.println();
-            printActions(agent.getActions());
+            //List act = agent.getActions();
+            //printActions(agent.getActions());
             printInstrumentation(agent.getInstrumentation());
-            if(esCorrecto) {printSolucion(solucion);}
+            if(esCorrecto) {
+                printSolucion(solucion);
+                System.out.println("\n\nTime elapsed: " + difference + "milliseconds, which are " + (difference / 1e3) + " seconds.");
+                int total_distance = solucion.CalcularDistanciaTotal();
+                System.out.println("\n\nWith " + solucion.TrayectosSize() + " drivers and a total distance traveled of " + total_distance);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -112,6 +122,4 @@ public class Main {
             System.out.println(" ");
         }
     }
-
-
 }
