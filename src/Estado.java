@@ -184,6 +184,10 @@ public class Estado {
                 trayectos.add(coche);
             }
         }
+        for(ArrayList<Integer> trayecto : trayectos){
+            distancias.add(CalcularDistancia(trayecto));
+            pasajerosSimulatenos.add(calcularPasajerosSimulataneos(trayecto));
+        }
         return trayectos;
     }
 
