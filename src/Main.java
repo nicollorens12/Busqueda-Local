@@ -7,7 +7,6 @@ import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
 import aima.search.informed.SimulatedAnnealingSearch;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.Calendar;
