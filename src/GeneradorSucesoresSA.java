@@ -3,7 +3,9 @@ package BusquedaLocal.src;
 import aima.search.framework.Successor;
 import aima.search.framework.SuccessorFunction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class GeneradorSucesoresSA implements SuccessorFunction {
 
@@ -16,61 +18,72 @@ public class GeneradorSucesoresSA implements SuccessorFunction {
     public List getSuccessors(Object aState) {
         Estado estado = (Estado) aState;
         ArrayList<Successor> retval = new ArrayList<>();
-        int o = randInt(0,3);
-        // if 1 swap inside
-        if (o == 0) {
-            int i = randInt(0,estado.TrayectosSize()-1);
-            if(estado.GetTrayecto(i).size() > 2) {
-                int j = randInt(1, estado.GetTrayecto(i).size() - 2);
-                int k = randInt(j + 1, estado.GetTrayecto(i).size() - 1);
-                if (!Objects.equals(estado.GetTrayecto(i).get(j), estado.GetTrayecto(i).get(k))) {
-                    Estado temp_state = new Estado(estado);
-                    temp_state.OperadorSwap(i, j, k);
-                    StringBuffer s = new StringBuffer();
-                    s.append("swap inside: Car " + i + " changing user " + j + " to position " + k); //+"\n"+ state.toString();
-                    retval.add(new Successor(s.toString(), temp_state));
-                    //    System.out.println(s.toString());
-                    //  System.out.println(count);
-                }
-            }
-        }
-        // else swap outside
-        else if(o == 1) {
-            int i = randInt(0,estado.TrayectosSize()); //cotxe 1
-            int j = randInt(0,estado.TrayectosSize());  //cotxe 2
-            if (i != j) {
-                if (estado.GetTrayecto(i).size() > 2) {
-                    int m = randInt(1, estado.GetTrayecto(i).size() - 1);
-                    int k = 1;
-                    int l = 2;
-                    if (estado.GetTrayecto(j).size() > 2) {
-                        k = randInt(1, estado.GetTrayecto(j).size() - 2); //on el deixem recollida
-                        l = randInt(k + 1, estado.GetTrayecto(j).size() - 1); //on el deixem deixada
+
+        // Operador de eliminar coche
+        if (estado.TrayectosSize() > 1) {
+            //int carToDelete = randInt(0, estado.TrayectosSize() - 1);
+            for (int carToDelete = 0; carToDelete < estado.TrayectosSize(); ++carToDelete) {
+                if (estado.GetTrayecto(carToDelete).size() == 2) {
+                    int destCar = randInt(0, estado.TrayectosSize() - 1);
+                    while (carToDelete == destCar) {
+                        destCar = randInt(0, estado.TrayectosSize() - 1);
                     }
-                    Estado temp_state = new Estado(estado);
-                    temp_state.OperadorMover(i, j, k, l);
+                    int userIdx = 0;
+                    int userId = estado.GetTrayecto(carToDelete).get(userIdx);
+
+                    Estado tempState = new Estado(estado);
+                    tempState.OperadorEliminar(carToDelete, destCar, userId);
                     StringBuffer s = new StringBuffer();
-                    s.append("swap outside:  Car " + i + " to Car " + j + " changing user " + m + " from " + k + " to " + l);
-                    retval.add(new Successor(s.toString(), temp_state));
+                    s.append("OperadorEliminar: eliminar coche " + carToDelete + ";    afegir a " + destCar + ";  usuari " + userId);
+                    retval.add(new Successor(s.toString(), tempState));
                 }
             }
         }
 
-        else {
-            int i = randInt(0,estado.TrayectosSize()); //cotxe 1
-            if (estado.GetTrayecto(i).size() == 2) {
-                int j = randInt(0, estado.TrayectosSize()); //cotxe 2
-                if (i != j) {
-                    int k = randInt(0,estado.GetTrayecto(i).size());
-                    int usuarioId = estado.GetTrayecto(i).get(k);
-                    Estado temp_state = new Estado(estado);
-                    temp_state.OperadorEliminar(i, j, usuarioId);
-                    StringBuffer s = new StringBuffer();
-                    s.append("delete : Deleting car " + i + " and adding to Car " + j + " afegir a " + j + ";  usuari " + k); //+"\n"+ state.toString();
-                    retval.add(new Successor(s.toString(), temp_state));
+        // Operador de mover usuario entre coches
+        if (estado.TrayectosSize() > 1) {
+            //int fromCar = randInt(0, estado.TrayectosSize() - 1);
+            for (int fromCar = 0; fromCar < estado.TrayectosSize(); ++fromCar) {
+                int toCar = randInt(0, estado.TrayectosSize() - 1);
+                while (fromCar == toCar) {
+                    toCar = randInt(0, estado.TrayectosSize() - 1);
+                }
+                int fromCarSize = estado.GetTrayecto(fromCar).size();
+                int toCarSize = estado.GetTrayecto(toCar).size();
+
+                if (toCarSize <= 4 && fromCarSize > 2) {
+                    int userIdx = randInt(1, fromCarSize);
+                    int userId = estado.GetTrayecto(fromCar).get(userIdx);
+                    {
+                        int possAdd = 2;
+                        if (toCarSize > 2) possAdd = randInt(1, toCarSize);
+                        Estado tempState = new Estado(estado);
+                        tempState.OperadorMover(fromCar, toCar, userId, possAdd);
+                        StringBuffer s = new StringBuffer();
+                        s.append("OperadorMove: coche " + fromCar + ";   a coche " + toCar + ";   usuari " + userId + ";   a " + possAdd);
+                        retval.add(new Successor(s.toString(), tempState));
+                    }
                 }
             }
+        }
 
+        // Operador de mover usuario dentro del mismo coche
+        int car = randInt(0, estado.TrayectosSize() - 1);
+        int carSize = estado.GetTrayecto(car).size();
+        while (carSize <= 2) {
+            car = randInt(0, estado.TrayectosSize() - 1);
+            carSize = estado.GetTrayecto(car).size();
+
+        }
+        int fromIdx = randInt(1, carSize - 2);
+        int toIdx = randInt(fromIdx + 1, carSize - 1);
+        if (fromIdx != toIdx) {
+            Estado tempState = new Estado(estado);
+            //public void OperadorSwap(int coche, int i, int j){
+            tempState.OperadorSwap(car, fromIdx, toIdx);
+            StringBuffer s = new StringBuffer();
+            s.append("OperadorSwap: coche " + car + ";  usuari " + fromIdx + ";  a pos " + fromIdx);
+            retval.add(new Successor(s.toString(), tempState));
         }
         return retval;
     }

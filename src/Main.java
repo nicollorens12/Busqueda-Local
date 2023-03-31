@@ -7,73 +7,106 @@ import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
 import aima.search.informed.SimulatedAnnealingSearch;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Properties;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
+        //for(int i = 0; i < 700; ++i) {
         int nUs, nCond, seed;
-        //leer variables
         nUs = 200;
         nCond = 100;
         seed = 1234;
-        Estado e = new Estado(nUs,nCond,seed);
-        //TSPHillClimbingSearch(e);
-        TSPSimulatedAnnealingSearch(e);
-    }
-    private static void TSPHillClimbingSearch(Estado estate) {
-        System.out.println("\nTSP HillClimbing  -->");
-        try {
-            long start_time = System.nanoTime();
-            Problem problem =  new Problem(estate,new GeneradorSucesores(), new EstadoFinal(),new Heuristica());
-            Search search =  new HillClimbingSearch();
-            SearchAgent agent = new SearchAgent(problem,search);
+        Estado e = new Estado(nUs, nCond, seed);
 
-            long end_time = System.nanoTime();
-            double difference = (end_time-start_time) / 1e6;
-            System.out.println("\n\nTime elapsed: " + difference + "milliseconds, which are " + (difference/1e3) + " seconds.");
+        boolean hc = true;
+        if (hc) HillClimbingSearch(e);
+        else {
+            int it = 2000;
+            int pit = 100;
+            int k = 5;
+            double lbd = 0.001;
+            SimulatedAnnealingSearch(e,it,pit,k,lbd);
+        }
+        //}
+    }
+    private static void HillClimbingSearch(Estado estate) {
+        System.out.println("\n| HillClimbing Seaarch |");
+        try {
+            Problem problem = new Problem(estate, new GeneradorSucesores(), new EstadoFinal(), new Heuristica());
+            Search search = new HillClimbingSearch();
+
+            Date d1,d2;
+            Calendar a,b;
+            d1=new Date();
+            try {
+                SearchAgent agent = new SearchAgent(problem, search);
+                System.out.println();
+                printActions(agent.getActions());
+                printInstrumentation(agent.getInstrumentation());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            d2=new Date();
+            a= Calendar.getInstance();
+            b= Calendar.getInstance();
+            a.setTime(d1);
+            b.setTime(d2);
+
+            long m=b.getTimeInMillis()-a.getTimeInMillis();
 
             Estado solucion = (Estado) search.getGoalState();
             EstadoFinal comprobar = new EstadoFinal();
-            boolean esCorrecto = comprobar.isGoalState(solucion);
-            if (solucion == null) System.out.println("Joder no hay solucion");
-            else System.out.println("La solucion es valida? " + esCorrecto);
-
-            System.out.println();
-            printActions(agent.getActions());
-            printInstrumentation(agent.getInstrumentation());
-            if(esCorrecto) {printSolucion(solucion);}
+            //boolean esCorrecto = comprobar.isGoalState(solucion);
+            if (solucion == null) System.out.println("Error: no hay solucion");
+            //else if (!esCorrecto) System.out.println("La solucion NO es valida");
+            //else {
+            printSolucion(solucion);
+            System.out.println("\nTiempo de ejecucion: " + m + " ms.   Número de coches utilizados: " + solucion.TrayectosSize() + "   Distancia total recorrida: " + solucion.CalcularDistanciaTotal() + " km. Forman parte todos los usuarios? " + solucion.TodosUsuarios(200));
+            //}
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void TSPSimulatedAnnealingSearch(Estado estate) {
-        System.out.println("\nTSP Simulated Annealing  -->");
+    private static void SimulatedAnnealingSearch(Estado estate, int it, int pit, int k, double lbd) {
+        System.out.println("\n| Simulated Annealing Search |");
         try {
-            long start_time = System.nanoTime();
-            Problem problem =  new Problem(estate,new GeneradorSucesoresSA(), new EstadoFinal(),new Heuristica());
-            SimulatedAnnealingSearch search =  new SimulatedAnnealingSearch(2000,100,5,0.001);
-            search.traceOn();
-            SearchAgent agent = new SearchAgent(problem,search);
+            Problem problem = new Problem(estate, new GeneradorSucesoresSA(), new EstadoFinal(), new Heuristica());
+            Search search = new SimulatedAnnealingSearch(it,pit,k,lbd);
 
-            long end_time = System.nanoTime();
-            double difference = (end_time-start_time) / 1e6;
-            System.out.println("\n\nTime elapsed: " + difference + "milliseconds, which are " + (difference/1e3) + " seconds.");
+            Date d1,d2;
+            Calendar a,b;
+            d1=new Date();
+            try {
+                SearchAgent agent = new SearchAgent(problem, search);
+                System.out.println();
+                printActions(agent.getActions());
+                printInstrumentation(agent.getInstrumentation());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            d2=new Date();
+            a= Calendar.getInstance();
+            b= Calendar.getInstance();
+            a.setTime(d1);
+            b.setTime(d2);
+
+            long m=b.getTimeInMillis()-a.getTimeInMillis();
+
+            System.out.println("T = "+m+" ms");
 
             Estado solucion = (Estado) search.getGoalState();
-            EstadoFinal comprobar = new EstadoFinal();
-            boolean esCorrecto = comprobar.isGoalState(solucion);
-            if (solucion == null) System.out.println("Joder no hay solucion");
-            else System.out.println("La solucion es valida? " + esCorrecto);
-
-            System.out.println();
-            printActions(agent.getActions());
-            printInstrumentation(agent.getInstrumentation());
-            if(esCorrecto) {printSolucion(solucion);}
+            //EstadoFinal comprobar = new EstadoFinal();
+            //boolean esCorrecto = comprobar.isGoalState(solucion);
+            if (solucion == null) System.out.println("Error: no hay solucion");
+            //else if (!esCorrecto) System.out.println("La solucion NO es valida");
+            //else {
+            printSolucion(solucion);
+            System.out.println("\n\nTiempo de ejecucion: " + m + " ms.   Número de coches utilizados: " + solucion.TrayectosSize() + "   Distancia total recorrida: " + solucion.CalcularDistanciaTotal() + " km. Forman parte todos los usuarios? " + solucion.TodosUsuarios(200));
+            //}
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -107,6 +140,4 @@ public class Main {
             System.out.println(" ");
         }
     }
-
-
 }
